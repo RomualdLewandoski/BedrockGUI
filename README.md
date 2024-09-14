@@ -1,5 +1,7 @@
 # BedrockGUI Plugin for spigot / paper forks
 
+[Spigot page]()
+
 This is a simple Minecraft plugin that allows servers to create custom GUI menus for Bedrock players who play on Java servers through [Geyser](https://geysermc.org/). This plugin leverages the Floodgate API to build GUIs that are accessible to Bedrock players, giving server admins the flexibility to create forms and menus for Bedrock players.
 
 ## Features
@@ -10,7 +12,7 @@ This is a simple Minecraft plugin that allows servers to create custom GUI menus
 
 ## Requirements
 - Minecraft Server (Paper, Spigot, etc.)
-- [Geyser](https://geysermc.org/) or [Floodgate](https://github.com/GeyserMC/Floodgate)
+- [Floodgate](https://github.com/GeyserMC/Floodgate)
 - (Optional) [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) for placeholders
 - Java 8+ (for server-side plugin)
 

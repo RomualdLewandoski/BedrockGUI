@@ -10,7 +10,8 @@ This is a simple Minecraft plugin that allows servers to create custom GUI menus
 
 ## Requirements
 - Minecraft Server (Paper, Spigot, etc.)
-- [Geyser](https://geysermc.org/) and [Floodgate](https://github.com/GeyserMC/Floodgate)
+- [Geyser](https://geysermc.org/) or [Floodgate](https://github.com/GeyserMC/Floodgate)
+- (Optional) [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) for placeholders
 - Java 8+ (for server-side plugin)
 
 ## Installation

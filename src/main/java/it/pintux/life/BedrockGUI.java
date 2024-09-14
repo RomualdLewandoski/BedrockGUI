@@ -5,6 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class BedrockGUI extends JavaPlugin implements Listener {
@@ -24,20 +25,34 @@ public final class BedrockGUI extends JavaPlugin implements Listener {
     }
 
     public void reloadData() {
-        saveConfig();
         reloadConfig();
         formMenuUtil = new FormMenuUtil(this);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
+    public void onCmd(ServerCommandEvent event) {
+        if (!(event.getSender() instanceof Player)) return;
+        Player player = (Player) event.getSender();
+        String command = event.getCommand();
+        formMenuUtil.getFormMenus().forEach((key, formMenu) -> {
+            if (formMenu.getFormCommand() != null) {
+                if (command.equalsIgnoreCase(formMenu.getFormCommand())) {
+                    event.setCancelled(true);
+                    formMenuUtil.openForm(player, key);
+                }
+            }
+        });
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
     public void onPlayerPreprocessCommand(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
         if (!FloodgateUtil.isFloodgate(player)) {
             return;
         }
         formMenuUtil.getFormMenus().forEach((key, formMenu) -> {
-            if (formMenu.formCommand() != null) {
-                if (event.getMessage().equalsIgnoreCase(formMenu.formCommand())) {
+            if (formMenu.getFormCommand() != null) {
+                if (event.getMessage().equalsIgnoreCase(formMenu.getFormCommand())) {
                     event.setCancelled(true);
                     formMenuUtil.openForm(player, key);
                 }

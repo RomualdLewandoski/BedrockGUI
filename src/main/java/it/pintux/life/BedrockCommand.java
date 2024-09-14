@@ -25,9 +25,9 @@ public class BedrockCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!(sender instanceof Player player))
+        if (!(sender instanceof Player))
             return true;
-
+        Player player = (Player) sender;
         if (!player.hasPermission("bedrockgui.admin")) {
             sender.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
             return true;
@@ -71,7 +71,10 @@ public class BedrockCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 1) {
-            return List.of("reload", "open");
+            List<String> commands = new ArrayList<>();
+            commands.add("reload");
+            commands.add("open");
+            return commands;
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("open")) {
             return Stream.of(plugin.getFormMenuUtil().getFormMenus().keySet())

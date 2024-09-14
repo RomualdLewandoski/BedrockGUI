@@ -35,9 +35,9 @@ public class FormMenuUtil {
             String description = config.getString("menu." + key + ".description");
             List<FormButton> buttons = new ArrayList<>();
             for (String button : config.getConfigurationSection("menu." + key + ".buttons").getKeys(false)) {
-                String text = config.getString("menu." + key + "." + button + ".text");
-                String image = config.getString("menu." + key + "." + button + ".image");
-                String onClick = config.getString("menu." + key + "." + button + ".onClick");
+                String text = config.getString("menu." + key + ".buttons." + button + ".text");
+                String image = config.getString("menu." + key + ".buttons." + button + ".image");
+                String onClick = config.getString("menu." + key + ".buttons." + button + ".onClick");
                 buttons.add(new FormButton(text, image, onClick));
             }
             if (type.equalsIgnoreCase("MODAL")) {
@@ -55,7 +55,7 @@ public class FormMenuUtil {
     public void openForm(Player player, String menuName) {
         FormMenu menu = formMenus.get(menuName.toLowerCase());
 
-        String type = menu.formType();
+        String type = menu.getFormType();
 
         switch (type.toUpperCase()) {
             case "MODAL":
@@ -70,10 +70,10 @@ public class FormMenuUtil {
     }
 
     private void openModalForm(Player player, FormMenu formMenu) {
-        String title = PlaceholderAPI.setPlaceholders(player, formMenu.formTitle());
-        String content = formMenu.formContent() != null ? PlaceholderAPI.setPlaceholders(player, formMenu.formContent()) : null;
+        String title = PlaceholderAPI.setPlaceholders(player, formMenu.getFormTitle());
+        String content = formMenu.getFormContent() != null ? PlaceholderAPI.setPlaceholders(player, formMenu.getFormContent()) : null;
 
-        List<FormButton> buttons = formMenu.formButtons();
+        List<FormButton> buttons = formMenu.getFormButtons();
         FormButton b1 = buttons.get(0);
         FormButton b2 = buttons.get(1);
 
@@ -85,16 +85,16 @@ public class FormMenuUtil {
         }
 
         formBuilder
-                .button1(PlaceholderAPI.setPlaceholders(player, b1.text()))
-                .button2(PlaceholderAPI.setPlaceholders(player, b2.text()))
+                .button1(PlaceholderAPI.setPlaceholders(player, b1.getText()))
+                .button2(PlaceholderAPI.setPlaceholders(player, b2.getText()))
                 .validResultHandler((formResponse, modalResponse) -> {
                     if (modalResponse.clickedButtonId() == 0) {
-                        if (b1.onClick() != null) {
-                            handleOnClick(player, b1.onClick());
+                        if (b1.getOnClick() != null) {
+                            handleOnClick(player, b1.getOnClick());
                         }
                     } else {
-                        if (b2.onClick() != null) {
-                            handleOnClick(player, b2.onClick());
+                        if (b2.getOnClick() != null) {
+                            handleOnClick(player, b2.getOnClick());
                         }
                     }
                 })
@@ -104,9 +104,9 @@ public class FormMenuUtil {
     }
 
     private void openSimpleForm(Player player, FormMenu formMenu) {
-        String title = PlaceholderAPI.setPlaceholders(player, formMenu.formTitle());
-        String content = formMenu.formContent() != null ? PlaceholderAPI.setPlaceholders(player, formMenu.formContent()) : null;
-        List<FormButton> buttons = formMenu.formButtons();
+        String title = PlaceholderAPI.setPlaceholders(player, formMenu.getFormTitle());
+        String content = formMenu.getFormContent() != null ? PlaceholderAPI.setPlaceholders(player, formMenu.getFormContent()) : null;
+        List<FormButton> buttons = formMenu.getFormButtons();
 
         SimpleForm.Builder formBuilder = SimpleForm.builder()
                 .title(title);
@@ -118,14 +118,14 @@ public class FormMenuUtil {
         List<String> onClickActions = new ArrayList<>();
 
         buttons.forEach(formButton -> {
-            String buttonText = PlaceholderAPI.setPlaceholders(player, formButton.text());
-            if (formButton.image() != null) {
-                formBuilder.button(buttonText, FormImage.Type.URL, formButton.image());
+            String buttonText = PlaceholderAPI.setPlaceholders(player, formButton.getText());
+            if (formButton.getImage() != null) {
+                formBuilder.button(buttonText, FormImage.Type.URL, formButton.getImage());
             } else {
                 formBuilder.button(buttonText);
             }
-            if (formButton.onClick() != null) {
-                onClickActions.add(formButton.onClick());
+            if (formButton.getOnClick() != null) {
+                onClickActions.add(formButton.getOnClick());
             }
         });
 

@@ -61,5 +61,5 @@ processResources {
 shadowJar {
     minimize()
     archiveClassifier = null
-    destinationDirectory.set("C:\\Users\\pintu\\Desktop\\Server" as File)
+    destinationDirectory.set(file("${System.getProperty('user.home')}/Desktop"))
 }

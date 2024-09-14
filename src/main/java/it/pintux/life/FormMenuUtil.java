@@ -160,7 +160,7 @@ public class FormMenuUtil {
         }
 
         String action = parts[0];
-        String value = parts[1];
+        String value = plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, parts[1]) : parts[1];
 
         if (action.equalsIgnoreCase("command")) {
             player.performCommand(value);

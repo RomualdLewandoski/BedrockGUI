@@ -1,0 +1,28 @@
+menu: #Only 2 types available at the moment! See https://geysermc.org/wiki/geyser/forms/ for examples
+  test:
+    type: MODAL #Simple with title, description and just 2 buttons!
+    title: "Modal test"
+    description: "Something here to write"
+    buttons:
+      bottone_1:
+        text: "Your_name »  %player_name%"
+        onClick: "command hi"
+      bottone_2:
+        text: "Other » thing"
+        onClick: "command hello"
+  test_simple:
+    command: "test" #this will open only if you do /test
+    type: SIMPLE #Title, description and a lot of cool buttons
+    title: "A simple title"
+    description: "Long text to fit in the menu"
+    buttons:
+      button:
+        text: "Some fancy text with  » %player_name% as placeholder"
+        image: "https://geysermc.org/assets/images/geyser-88cf8a88a1c88cc983b4c44d6b75f7fe.png"
+        onClick: "command version"
+      without_click:
+        text: "Some fancy text with  »  %player_name% as placeholder"
+        image: "https://geysermc.org/assets/images/geyser-88cf8a88a1c88cc983b4c44d6b75f7fe.png"
+      without_image:
+        text: "Some fancy text with  »  %player_name% as placeholder"
+        onClick: "open test" #Will open the menu "test"

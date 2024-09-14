@@ -1,0 +1,11 @@
+name: BedrockGUI
+version: '1.0-SNAPSHOT'
+main: it.pintux.life.BedrockGUI
+api-version: '1.19'
+author: "pintux"
+commands:
+  bedrockgui:
+    usage: "/bedrockgui <reload | open>"
+    permission: "bedrockgui.admin"
+    aliases:
+      - "bgui"

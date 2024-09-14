@@ -11,6 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class BedrockGUI extends JavaPlugin implements Listener {
 
     private FormMenuUtil formMenuUtil;
+    private boolean isPlaceholderAPI;
 
     @Override
     public void onEnable() {
@@ -18,6 +19,9 @@ public final class BedrockGUI extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
         saveDefaultConfig();
         reloadData();
+        if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            isPlaceholderAPI = true;
+        }
     }
 
     @Override
@@ -62,5 +66,9 @@ public final class BedrockGUI extends JavaPlugin implements Listener {
 
     public FormMenuUtil getFormMenuUtil() {
         return formMenuUtil;
+    }
+
+    public boolean isPlaceholderAPI() {
+        return isPlaceholderAPI;
     }
 }

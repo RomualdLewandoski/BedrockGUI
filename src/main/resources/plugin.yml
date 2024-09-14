@@ -3,6 +3,10 @@ version: '1.0-SNAPSHOT'
 main: it.pintux.life.BedrockGUI
 api-version: '1.19'
 author: "pintux"
+depend:
+  - floodgate
+softdepend:
+  - PlaceholderAPI
 commands:
   bedrockgui:
     usage: "/bedrockgui <reload | open>"

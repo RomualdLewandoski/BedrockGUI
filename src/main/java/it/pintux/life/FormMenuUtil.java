@@ -70,8 +70,8 @@ public class FormMenuUtil {
     }
 
     private void openModalForm(Player player, FormMenu formMenu) {
-        String title = PlaceholderAPI.setPlaceholders(player, formMenu.getFormTitle());
-        String content = formMenu.getFormContent() != null ? PlaceholderAPI.setPlaceholders(player, formMenu.getFormContent()) : null;
+        String title = plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, formMenu.getFormTitle()) : formMenu.getFormTitle();
+        String content = formMenu.getFormContent() != null ? plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, formMenu.getFormContent()) : formMenu.getFormContent() : null;
 
         List<FormButton> buttons = formMenu.getFormButtons();
         FormButton b1 = buttons.get(0);
@@ -85,8 +85,8 @@ public class FormMenuUtil {
         }
 
         formBuilder
-                .button1(PlaceholderAPI.setPlaceholders(player, b1.getText()))
-                .button2(PlaceholderAPI.setPlaceholders(player, b2.getText()))
+                .button1(plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, b1.getText()) : b1.getText())
+                .button2(plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, b2.getText()) : b2.getText())
                 .validResultHandler((formResponse, modalResponse) -> {
                     if (modalResponse.clickedButtonId() == 0) {
                         if (b1.getOnClick() != null) {
@@ -104,8 +104,8 @@ public class FormMenuUtil {
     }
 
     private void openSimpleForm(Player player, FormMenu formMenu) {
-        String title = PlaceholderAPI.setPlaceholders(player, formMenu.getFormTitle());
-        String content = formMenu.getFormContent() != null ? PlaceholderAPI.setPlaceholders(player, formMenu.getFormContent()) : null;
+        String title = plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, formMenu.getFormTitle()) : formMenu.getFormTitle();
+        String content = formMenu.getFormContent() != null ? plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, formMenu.getFormContent()) : formMenu.getFormContent() : null;
         List<FormButton> buttons = formMenu.getFormButtons();
 
         SimpleForm.Builder formBuilder = SimpleForm.builder()
@@ -118,7 +118,7 @@ public class FormMenuUtil {
         List<String> onClickActions = new ArrayList<>();
 
         buttons.forEach(formButton -> {
-            String buttonText = PlaceholderAPI.setPlaceholders(player, formButton.getText());
+            String buttonText = plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, formButton.getText()) : formButton.getText();
             if (formButton.getImage() != null) {
                 formBuilder.button(buttonText, FormImage.Type.URL, formButton.getImage());
             } else {

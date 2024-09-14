@@ -41,6 +41,7 @@ public class BedrockCommand implements CommandExecutor, TabCompleter {
         String arg = args[0];
         if (arg.equalsIgnoreCase("reload")) {
             plugin.reloadData();
+            sender.sendMessage(ChatColor.GREEN + "Reloaded BedrockGUI!");
             return true;
         }
         if (arg.equalsIgnoreCase("open")) {

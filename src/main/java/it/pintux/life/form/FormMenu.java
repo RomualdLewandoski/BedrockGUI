@@ -1,18 +1,19 @@
 package it.pintux.life.form;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
 public class FormMenu {
     private String formCommand;
+    private String permission;
     private String formTitle;
     private String formContent;
     private String formType;
     private List<FormButton> formButtons;
 
-    public FormMenu(String formCommand, String formTitle, String formContent, String formType, List<FormButton> formButtons) {
+    public FormMenu(String formCommand,String permission, String formTitle, String formContent, String formType, List<FormButton> formButtons) {
         this.formCommand = formCommand;
+        this.permission = permission;
         this.formTitle = formTitle;
         this.formContent = formContent;
         this.formType = formType;
@@ -25,6 +26,14 @@ public class FormMenu {
 
     public void setFormCommand(String formCommand) {
         this.formCommand = formCommand;
+    }
+
+    public String getPermission() {
+        return permission;
+    }
+
+    public void setPermission(String permission) {
+        this.permission = permission;
     }
 
     public String getFormTitle() {

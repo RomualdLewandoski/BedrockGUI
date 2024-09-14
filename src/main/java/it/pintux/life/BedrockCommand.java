@@ -28,11 +28,6 @@ public class BedrockCommand implements CommandExecutor, TabCompleter {
         if (!(sender instanceof Player))
             return true;
         Player player = (Player) sender;
-        if (!player.hasPermission("bedrockgui.admin")) {
-            sender.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
-            return true;
-        }
-
         if (args.length == 0) {
             sender.sendMessage(ChatColor.RED + "Usage: /bgui reload");
             sender.sendMessage(ChatColor.RED + "Usage: /bgui open <menu_name>");
@@ -40,6 +35,10 @@ public class BedrockCommand implements CommandExecutor, TabCompleter {
         }
         String arg = args[0];
         if (arg.equalsIgnoreCase("reload")) {
+            if (!player.hasPermission("bedrockgui.admin")) {
+                sender.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
+                return true;
+            }
             plugin.reloadData();
             sender.sendMessage(ChatColor.GREEN + "Reloaded BedrockGUI!");
             return true;

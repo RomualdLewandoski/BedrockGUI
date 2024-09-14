@@ -3,6 +3,7 @@ package it.pintux.life;
 import it.pintux.life.form.FormButton;
 import it.pintux.life.form.FormMenu;
 import me.clip.placeholderapi.PlaceholderAPI;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.geysermc.cumulus.form.ModalForm;
 import org.geysermc.cumulus.form.SimpleForm;
@@ -30,6 +31,7 @@ public class FormMenuUtil {
         FileConfiguration config = plugin.getConfig();
         for (String key : config.getConfigurationSection("menu").getKeys(false)) {
             String command = config.getString("menu." + key + ".command");
+            String permission = config.getString("menu." + key + ".permission");
             String type = config.getString("menu." + key + ".type", "SIMPLE");
             String title = config.getString("menu." + key + ".title", "Unknown");
             String description = config.getString("menu." + key + ".description");
@@ -46,7 +48,7 @@ public class FormMenuUtil {
                     continue;
                 }
             }
-            FormMenu menu = new FormMenu(command, title, description, type, buttons);
+            FormMenu menu = new FormMenu(command, permission, title, description, type, buttons);
             formMenus.put(key.toLowerCase(), menu);
             plugin.getLogger().info("Loaded form menu: " + key + " type: " + type);
         }
@@ -54,6 +56,11 @@ public class FormMenuUtil {
 
     public void openForm(Player player, String menuName) {
         FormMenu menu = formMenus.get(menuName.toLowerCase());
+
+        if (menu.getPermission() != null && !player.hasPermission(menu.getPermission())) {
+            player.sendMessage(ChatColor.RED + "You don't have permission to use this menu!");
+            return;
+        }
 
         String type = menu.getFormType();
 

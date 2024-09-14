@@ -12,6 +12,7 @@ menu: #Only 2 types available at the moment! See https://geysermc.org/wiki/geyse
         onClick: "command hello"
   test_simple:
     command: "test" #this will open only if you do /test
+    permission: "bedrockgui.permission"
     type: SIMPLE #Title, description and a lot of cool buttons
     title: "A simple title"
     description: "Long text to fit in the menu"

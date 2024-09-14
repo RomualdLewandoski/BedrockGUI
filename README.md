@@ -4,6 +4,8 @@
 
 This is a simple Minecraft plugin that allows servers to create custom GUI menus for Bedrock players who play on Java servers through [Geyser](https://geysermc.org/). This plugin leverages the Floodgate API to build GUIs that are accessible to Bedrock players, giving server admins the flexibility to create forms and menus for Bedrock players.
 
+![Example](https://imgur.com/zdH3D5E)
+
 ## Features
 - Create custom GUIs for Bedrock players.
 - Support for both `SimpleForm` and `ModalForm`.

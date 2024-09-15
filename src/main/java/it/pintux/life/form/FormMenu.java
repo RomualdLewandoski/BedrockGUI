@@ -11,7 +11,7 @@ public class FormMenu {
     private String formType;
     private List<FormButton> formButtons;
 
-    public FormMenu(String formCommand,String permission, String formTitle, String formContent, String formType, List<FormButton> formButtons) {
+    public FormMenu(String formCommand, String permission, String formTitle, String formContent, String formType, List<FormButton> formButtons) {
         this.formCommand = formCommand;
         this.permission = permission;
         this.formTitle = formTitle;

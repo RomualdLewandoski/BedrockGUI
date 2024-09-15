@@ -1,9 +1,10 @@
-package it.pintux.life;
+package it.pintux.life.utils;
 
+import it.pintux.life.BedrockGUI;
+import it.pintux.life.MessageData;
 import it.pintux.life.form.FormButton;
 import it.pintux.life.form.FormMenu;
 import me.clip.placeholderapi.PlaceholderAPI;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.geysermc.cumulus.form.ModalForm;
 import org.geysermc.cumulus.form.SimpleForm;
@@ -11,10 +12,7 @@ import org.geysermc.cumulus.util.FormImage;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FormMenuUtil {
 
@@ -54,31 +52,37 @@ public class FormMenuUtil {
         }
     }
 
-    public void openForm(Player player, String menuName) {
+    public void openForm(Player player, String menuName, String[] args) {
         FormMenu menu = formMenus.get(menuName.toLowerCase());
 
         if (menu.getPermission() != null && !player.hasPermission(menu.getPermission())) {
-            player.sendMessage(ChatColor.RED + "You don't have permission to use this menu!");
+            player.sendMessage(MessageData.getValue(MessageData.MENU_NOPEX, null, null));
+            return;
+        }
+
+        if (menu.getFormCommand() != null && !validateCommandArguments(menu.getFormCommand(), args, player)) {
             return;
         }
 
         String type = menu.getFormType();
 
+        Map<String, String> placeholders = new HashMap<>();
+        for (int i = 0; i < args.length; i++) {
+            placeholders.put(String.valueOf(i + 1), args[i]);
+        }
+
         switch (type.toUpperCase()) {
             case "MODAL":
-                openModalForm(player, menu);
+                openModalForm(player, menu, placeholders);
                 break;
             case "SIMPLE":
-                openSimpleForm(player, menu);
+                openSimpleForm(player, menu, placeholders);
                 break;
-            default:
-                player.sendMessage("Unknown form type: " + type);
         }
     }
 
-    private void openModalForm(Player player, FormMenu formMenu) {
-        String title = plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, formMenu.getFormTitle()) : formMenu.getFormTitle();
-        String content = formMenu.getFormContent() != null ? plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, formMenu.getFormContent()) : formMenu.getFormContent() : null;
+    private void openModalForm(Player player, FormMenu formMenu, Map<String, String> placeholders) {
+        String title = replacePlaceholders(formMenu.getFormTitle(), placeholders, player);
 
         List<FormButton> buttons = formMenu.getFormButtons();
         FormButton b1 = buttons.get(0);
@@ -87,86 +91,120 @@ public class FormMenuUtil {
         ModalForm.Builder formBuilder = ModalForm.builder()
                 .title(title);
 
+        String content = formMenu.getFormContent();
         if (content != null) {
-            formBuilder.content(content);
+            formBuilder.content(replacePlaceholders(content, placeholders, player));
         }
 
         formBuilder
-                .button1(plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, b1.getText()) : b1.getText())
-                .button2(plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, b2.getText()) : b2.getText())
+                .button1(replacePlaceholders(b1.getText(), placeholders, player))
+                .button2(replacePlaceholders(b2.getText(), placeholders, player))
                 .validResultHandler((formResponse, modalResponse) -> {
                     if (modalResponse.clickedButtonId() == 0) {
                         if (b1.getOnClick() != null) {
-                            handleOnClick(player, b1.getOnClick());
+                            handleOnClick(player, b1.getOnClick(), placeholders);
                         }
                     } else {
                         if (b2.getOnClick() != null) {
-                            handleOnClick(player, b2.getOnClick());
+                            handleOnClick(player, b2.getOnClick(), placeholders);
                         }
                     }
                 })
                 .build();
 
-        FloodgateApi.getInstance().sendForm(player.getUniqueId(), formBuilder);
+        FloodgateApi.getInstance().sendForm(player.getUniqueId(), formBuilder.build());
     }
 
-    private void openSimpleForm(Player player, FormMenu formMenu) {
-        String title = plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, formMenu.getFormTitle()) : formMenu.getFormTitle();
-        String content = formMenu.getFormContent() != null ? plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, formMenu.getFormContent()) : formMenu.getFormContent() : null;
+    private void openSimpleForm(Player player, FormMenu formMenu, Map<String, String> placeholders) {
+        String title = replacePlaceholders(formMenu.getFormTitle(), placeholders, player);
+
         List<FormButton> buttons = formMenu.getFormButtons();
+        SimpleForm.Builder formBuilder = SimpleForm.builder().title(title);
 
-        SimpleForm.Builder formBuilder = SimpleForm.builder()
-                .title(title);
-
+        String content = formMenu.getFormContent();
         if (content != null) {
-            formBuilder.content(content);
+            formBuilder.content(replacePlaceholders(content, placeholders, player));
         }
 
         List<String> onClickActions = new ArrayList<>();
-
-        buttons.forEach(formButton -> {
-            String buttonText = plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, formButton.getText()) : formButton.getText();
-            if (formButton.getImage() != null) {
-                formBuilder.button(buttonText, FormImage.Type.URL, formButton.getImage());
+        for (FormButton button : buttons) {
+            String buttonText = replacePlaceholders(button.getText(), placeholders, player);
+            if (button.getImage() != null) {
+                formBuilder.button(buttonText, FormImage.Type.URL, button.getImage());
             } else {
                 formBuilder.button(buttonText);
             }
-            if (formButton.getOnClick() != null) {
-                onClickActions.add(formButton.getOnClick());
+            if (button.getOnClick() != null) {
+                onClickActions.add(button.getOnClick());
             }
-        });
+        }
 
         formBuilder.validResultHandler((form, response) -> {
             int clickedButtonId = response.clickedButtonId();
             String action = onClickActions.get(clickedButtonId);
 
-            handleOnClick(player, action);
+            handleOnClick(player, action, placeholders);
         });
 
-
         SimpleForm form = formBuilder.build();
-
         FloodgateApi.getInstance().sendForm(player.getUniqueId(), form);
     }
 
-    private void handleOnClick(Player player, String onClickAction) {
-        onClickAction = onClickAction.trim().replaceAll("\\s+", " ");
+    private void handleOnClick(Player player, String onClickAction, Map<String, String> placeholders) {
+        onClickAction = replacePlaceholders(onClickAction.trim().replaceAll("\\s+", " "), placeholders, player);
 
         String[] parts = onClickAction.split(" ", 2);
 
-        if (parts.length != 2) {
+        if (parts.length < 2) {
             player.sendMessage("Invalid onClick action: " + onClickAction);
             return;
         }
 
         String action = parts[0];
-        String value = plugin.isPlaceholderAPI() ? PlaceholderAPI.setPlaceholders(player, parts[1]) : parts[1];
+        String value = parts[1];
 
         if (action.equalsIgnoreCase("command")) {
             player.performCommand(value);
         } else if (action.equalsIgnoreCase("open")) {
-            openForm(player, value);
+            String[] newArgs = value.split(" ");
+            String menuName = newArgs[0];
+            String[] actualArgs = Arrays.copyOfRange(newArgs, 1, newArgs.length);
+            openForm(player, menuName, actualArgs);
         }
+    }
+
+    private boolean validateCommandArguments(String command, String[] args, Player player) {
+        if (command == null || command.isEmpty()) {
+            return true;
+        }
+        int requiredArgs = countPlaceholders(command);
+        if (args.length < requiredArgs) {
+            player.sendMessage(MessageData.getValue(MessageData.MENU_ARGS, Map.of("args", requiredArgs), null));
+            return false;
+        }
+        return true;
+    }
+
+    private int countPlaceholders(String command) {
+        int count = 0;
+        while (command.contains("$" + (count + 1))) {
+            count++;
+        }
+        return count;
+    }
+
+    private String replacePlaceholders(String text, Map<String, String> placeholders, Player player) {
+        if (text == null) return null;
+
+        if (plugin.isPlaceholderAPI() && text.contains("%")) {
+            text = PlaceholderAPI.setPlaceholders(player, text);
+        }
+
+        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+            text = text.replace("$" + entry.getKey(), entry.getValue());
+        }
+
+        return text;
     }
 
     public Map<String, FormMenu> getFormMenus() {

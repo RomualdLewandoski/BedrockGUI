@@ -1,4 +1,4 @@
-package it.pintux.life;
+package it.pintux.life.utils;
 
 import org.bukkit.entity.Player;
 import org.geysermc.floodgate.api.FloodgateApi;

@@ -1,5 +1,6 @@
 package it.pintux.life;
 
+import it.pintux.life.utils.FloodgateUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,7 +38,7 @@ public class BedrockCommand implements CommandExecutor, TabCompleter {
         String arg = args[0];
         if (arg.equalsIgnoreCase("reload")) {
             if (!player.hasPermission("bedrockgui.admin")) {
-                sender.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
+                sender.sendMessage(MessageData.getValue(MessageData.NO_PEX, null, null));
                 return true;
             }
             plugin.reloadData();
@@ -45,16 +47,17 @@ public class BedrockCommand implements CommandExecutor, TabCompleter {
         }
         if (arg.equalsIgnoreCase("open")) {
             if (args.length < 2) {
-                sender.sendMessage(ChatColor.RED + "Usage: /bgui open <menu_name>");
+                sender.sendMessage(ChatColor.RED + "Usage: /bgui open <menu_name> [arguments]");
                 return true;
             }
 
             if (!FloodgateUtil.isFloodgate(player)) {
-                sender.sendMessage(ChatColor.RED + "You are not a bedrock player!");
+                sender.sendMessage(MessageData.getValue(MessageData.MENU_NOJAVA, null, null));
                 return true;
             }
             String menuName = args[1];
-            plugin.getFormMenuUtil().openForm(player, menuName);
+            String[] menuArgs = Arrays.copyOfRange(args, 2, args.length);
+            plugin.getFormMenuUtil().openForm(player, menuName, menuArgs);
         }
 
         return true;

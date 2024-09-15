@@ -27,6 +27,7 @@ public final class BedrockGUI extends JavaPlugin implements Listener {
         if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             isPlaceholderAPI = true;
         }
+        new Metrics(this, 23364);
     }
 
     @Override

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'it.pintux'
-version = '1.5'
+version = '1.5.1'
 
 repositories {
     mavenCentral()
@@ -23,6 +23,8 @@ repositories {
         name = 'PAPI'
         url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
     }
+
+    maven { url "https://repo.dmulloy2.net/repository/public/" }
 }
 
 dependencies {

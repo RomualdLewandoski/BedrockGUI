@@ -22,8 +22,10 @@ public class MessageData {
     private static final Pattern hexPattern = Pattern.compile("<#([A-Fa-f0-9]){6}>");
 
     private static FileConfiguration config;
+    private static BedrockGUI plugin;
 
     public MessageData(BedrockGUI plugin, String filename) {
+        this.plugin = plugin;
         File file = new File(plugin.getDataFolder(), filename);
         config = YamlConfiguration.loadConfiguration(file);
     }
@@ -60,7 +62,9 @@ public class MessageData {
                 value = value.replace(placeholder, String.valueOf(entry.getValue()));
             }
         }
-        value = PlaceholderAPI.setPlaceholders(player, value);
+        if (plugin.isPlaceholderAPI()) {
+            value = PlaceholderAPI.setPlaceholders(player, value);
+        }
         Matcher matcher = Pattern.compile("\\{(\\w+)}").matcher(value);
         while (matcher.find()) {
             String placeholder = matcher.group(1);

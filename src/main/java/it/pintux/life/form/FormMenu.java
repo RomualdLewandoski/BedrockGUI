@@ -1,6 +1,7 @@
 package it.pintux.life.form;
 
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 public class FormMenu {
@@ -10,14 +11,18 @@ public class FormMenu {
     private String formContent;
     private String formType;
     private List<FormButton> formButtons;
+    private Map<String, Map<String, Object>> components;
+    private List<String> globalActions;
 
-    public FormMenu(String formCommand, String permission, String formTitle, String formContent, String formType, List<FormButton> formButtons) {
+    public FormMenu(String formCommand, String permission, String formTitle, String formContent, String formType, List<FormButton> formButtons, Map<String, Map<String, Object>> components, List<String> globalActions) {
         this.formCommand = formCommand;
         this.permission = permission;
         this.formTitle = formTitle;
         this.formContent = formContent;
         this.formType = formType;
         this.formButtons = formButtons;
+        this.components = components;
+        this.globalActions = globalActions;  // Initialize global actions
     }
 
     public String getFormCommand() {
@@ -66,6 +71,22 @@ public class FormMenu {
 
     public void setFormButtons(List<FormButton> formButtons) {
         this.formButtons = formButtons;
+    }
+
+    public Map<String, Map<String, Object>> getComponents() {
+        return components;
+    }
+
+    public void setComponents(Map<String, Map<String, Object>> components) {
+        this.components = components;
+    }
+
+    public List<String> getGlobalActions() {
+        return globalActions;
+    }
+
+    public void setGlobalActions(List<String> globalActions) {
+        this.globalActions = globalActions;
     }
 
     @Override

@@ -18,6 +18,7 @@ public class MessageData {
     public static String MENU_NOPEX = "menu.noPex";
     public static String MENU_NOJAVA = "menu.noJava";
     public static String MENU_ARGS = "menu.arguments";
+    public static String MENU_NOT_FOUND = "menu.notFound";
 
     private static final Pattern hexPattern = Pattern.compile("<#([A-Fa-f0-9]){6}>");
 

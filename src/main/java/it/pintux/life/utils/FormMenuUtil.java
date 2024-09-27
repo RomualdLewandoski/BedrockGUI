@@ -6,6 +6,7 @@ import it.pintux.life.form.FormButton;
 import it.pintux.life.form.FormMenu;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.geysermc.cumulus.form.CustomForm;
 import org.geysermc.cumulus.form.ModalForm;
 import org.geysermc.cumulus.form.SimpleForm;
 import org.geysermc.cumulus.util.FormImage;
@@ -34,19 +35,32 @@ public class FormMenuUtil {
             String title = config.getString("menu." + key + ".title", "Unknown");
             String description = config.getString("menu." + key + ".description");
             List<FormButton> buttons = new ArrayList<>();
-            for (String button : config.getConfigurationSection("menu." + key + ".buttons").getKeys(false)) {
-                String text = config.getString("menu." + key + ".buttons." + button + ".text");
-                String image = config.getString("menu." + key + ".buttons." + button + ".image");
-                String onClick = config.getString("menu." + key + ".buttons." + button + ".onClick");
-                buttons.add(new FormButton(text, image, onClick));
-            }
-            if (type.equalsIgnoreCase("MODAL")) {
-                if (buttons.size() != 2) {
-                    plugin.getLogger().severe("Modal's must only have 2 buttons! Please modify menu." + key);
-                    continue;
+            if (type.equalsIgnoreCase("SIMPLE") || type.equalsIgnoreCase("MODAL")) {
+                for (String button : config.getConfigurationSection("menu." + key + ".buttons").getKeys(false)) {
+                    String text = config.getString("menu." + key + ".buttons." + button + ".text");
+                    String image = config.getString("menu." + key + ".buttons." + button + ".image");
+                    String onClick = config.getString("menu." + key + ".buttons." + button + ".onClick");
+                    buttons.add(new FormButton(text, image, onClick));
+                }
+                if (type.equalsIgnoreCase("MODAL")) {
+                    if (buttons.size() != 2) {
+                        plugin.getLogger().severe("Modal's must only have 2 buttons! Please modify menu." + key);
+                        continue;
+                    }
                 }
             }
-            FormMenu menu = new FormMenu(command, permission, title, description, type, buttons);
+
+            Map<String, Map<String, Object>> components = new HashMap<>();
+            if (type.equalsIgnoreCase("CUSTOM")) {
+                for (String componentKey : config.getConfigurationSection("menu." + key + ".components").getKeys(false)) {
+                    Map<String, Object> component = config.getConfigurationSection("menu." + key + ".components." + componentKey).getValues(false);
+                    components.put(componentKey, component);
+                }
+            }
+
+            List<String> globalActions = config.getStringList("menu." + key + ".global_actions");
+
+            FormMenu menu = new FormMenu(command, permission, title, description, type, buttons, components, globalActions);
             formMenus.put(key.toLowerCase(), menu);
             plugin.getLogger().info("Loaded form menu: " + key + " type: " + type);
         }
@@ -54,6 +68,10 @@ public class FormMenuUtil {
 
     public void openForm(Player player, String menuName, String[] args) {
         FormMenu menu = formMenus.get(menuName.toLowerCase());
+        if (menu == null) {
+            player.sendMessage(MessageData.getValue(MessageData.MENU_NOT_FOUND, null, null));
+            return;
+        }
 
         if (menu.getPermission() != null && !player.hasPermission(menu.getPermission())) {
             player.sendMessage(MessageData.getValue(MessageData.MENU_NOPEX, null, null));
@@ -77,6 +95,9 @@ public class FormMenuUtil {
                 break;
             case "SIMPLE":
                 openSimpleForm(player, menu, placeholders);
+                break;
+            case "CUSTOM":
+                openCustomForm(player, menu, placeholders);
                 break;
         }
     }
@@ -150,6 +171,113 @@ public class FormMenuUtil {
         FloodgateApi.getInstance().sendForm(player.getUniqueId(), form);
     }
 
+    private void openCustomForm(Player player, FormMenu formMenu, Map<String, String> placeholders) {
+        String title = replacePlaceholders(formMenu.getFormTitle(), placeholders, player);
+        CustomForm.Builder formBuilder = CustomForm.builder().title(title);
+
+        Map<Integer, String> componentActions = new HashMap<>();
+        Map<String, Object> componentResults = new HashMap<>();
+        int[] componentIndex = {0};
+
+        for (String componentKey : formMenu.getComponents().keySet()) {
+            Map<String, Object> component = formMenu.getComponents().get(componentKey);
+            String type = (String) component.get("type");
+
+            switch (type.toLowerCase()) {
+                case "input":
+                    String inputText = replacePlaceholders((String) component.get("text"), placeholders, player);
+                    String placeholder = (String) component.get("placeholder");
+                    String defaultValue = (String) component.get("default");
+                    formBuilder.input(inputText, placeholder, defaultValue);
+                    componentActions.put(componentIndex[0], (String) component.get("action"));
+                    componentResults.put(componentKey, "");
+                    break;
+                case "slider":
+                    String sliderText = replacePlaceholders((String) component.get("text"), placeholders, player);
+                    int min = (int) component.get("min");
+                    int max = (int) component.get("max");
+                    int step = (int) component.get("step");
+                    int defaultSlider = (int) component.get("default");
+                    formBuilder.slider(sliderText, min, max, step, defaultSlider);
+                    componentActions.put(componentIndex[0], (String) component.get("action"));
+                    componentResults.put(componentKey, 0);
+                    break;
+                case "dropdown":
+                    String dropdownText = replacePlaceholders((String) component.get("text"), placeholders, player);
+                    List<String> options = (List<String>) component.get("options");
+                    int defaultDropdown = (int) component.get("default");
+                    formBuilder.dropdown(dropdownText, options, defaultDropdown);
+                    componentActions.put(componentIndex[0], (String) component.get("action"));
+                    componentResults.put(componentKey, "");
+                    break;
+                case "toggle":
+                    String toggleText = replacePlaceholders((String) component.get("text"), placeholders, player);
+                    boolean defaultToggle = (boolean) component.get("default");
+                    formBuilder.toggle(toggleText, defaultToggle);
+                    componentActions.put(componentIndex[0], (String) component.get("action"));
+                    componentResults.put(componentKey, false);
+                    break;
+            }
+
+            componentIndex[0]++;
+        }
+
+        formBuilder.validResultHandler((formResponse, customFormResponse) -> {
+            componentIndex[0] = 0;
+
+            for (String componentKey : formMenu.getComponents().keySet()) {
+                Map<String, Object> component = formMenu.getComponents().get(componentKey);
+                String type = (String) component.get("type");
+                String action = componentActions.get(componentIndex[0]);
+
+                String result = "";
+                switch (type.toLowerCase()) {
+                    case "input":
+                        result = customFormResponse.asInput(componentIndex[0]);
+                        componentResults.put(componentKey, result);
+                        break;
+                    case "slider":
+                        int sliderResult = (int) customFormResponse.asSlider(componentIndex[0]);
+                        result = String.valueOf(sliderResult);
+                        componentResults.put(componentKey, sliderResult);
+                        break;
+                    case "dropdown":
+                        int dropdownResult = customFormResponse.asDropdown(componentIndex[0]);
+                        List<String> options = (List<String>) component.get("options");
+                        result = options.get(dropdownResult);
+                        componentResults.put(componentKey, result);
+                        break;
+                    case "toggle":
+                        boolean toggleResult = customFormResponse.asToggle(componentIndex[0]);
+                        result = String.valueOf(toggleResult);
+                        componentResults.put(componentKey, toggleResult);
+                        break;
+                }
+
+                if (action != null) {
+                    handleCustomAction(player, action, result);
+                }
+
+                componentIndex[0]++;
+            }
+
+            List<String> globalActions = formMenu.getGlobalActions();
+            if (globalActions != null) {
+                for (String globalAction : globalActions) {
+                    String finalAction = globalAction;
+                    for (Map.Entry<String, Object> entry : componentResults.entrySet()) {
+                        finalAction = finalAction.replace("$" + entry.getKey(), entry.getValue().toString());
+                    }
+
+                    handleCustomAction(player, finalAction, null);
+                }
+            }
+        });
+
+        CustomForm form = formBuilder.build();
+        FloodgateApi.getInstance().sendForm(player.getUniqueId(), form);
+    }
+
     private void handleOnClick(Player player, String onClickAction, Map<String, String> placeholders) {
         onClickAction = replacePlaceholders(onClickAction.trim().replaceAll("\\s+", " "), placeholders, player);
 
@@ -164,7 +292,10 @@ public class FormMenuUtil {
         String value = parts[1];
 
         if (action.equalsIgnoreCase("command")) {
-            player.performCommand(value);
+            if (!value.startsWith("/")) {
+                value = "/".concat(value);
+            }
+            player.chat(value);
         } else if (action.equalsIgnoreCase("open")) {
             String[] newArgs = value.split(" ");
             String menuName = newArgs[0];
@@ -183,6 +314,29 @@ public class FormMenuUtil {
             return false;
         }
         return true;
+    }
+
+
+    private void handleCustomAction(Player player, String action, String value) {
+        if (value != null) {
+            action = action.replace("$1", value);
+        }
+
+        String[] parts = action.split(" ", 2);
+        String actionType = parts[0];
+        String actionValue = parts.length > 1 ? parts[1] : "";
+
+        switch (actionType.toLowerCase()) {
+            case "command":
+                if (!actionValue.startsWith("/")) {
+                    actionValue = "/" + actionValue;
+                }
+                player.chat(actionValue);
+                break;
+            default:
+                player.sendMessage("Unknown action type: " + actionType);
+                break;
+        }
     }
 
     private int countPlaceholders(String command) {

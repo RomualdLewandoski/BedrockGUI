@@ -16,6 +16,6 @@ subprojects {
     targetCompatibility = '17'
 
     dependencies {
-        // Common dependencies for all submodules, if any
+        compileOnly('org.geysermc.floodgate:api:2.2.3-SNAPSHOT')
     }
 }

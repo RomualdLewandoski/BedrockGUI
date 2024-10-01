@@ -1,1 +1,4 @@
 rootProject.name = 'BedrockGUI'
+include 'common'
+include 'bungeecord'
+include 'paper'

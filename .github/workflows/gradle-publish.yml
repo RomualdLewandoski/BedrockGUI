@@ -29,13 +29,13 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: BedrockGUI-Bungee
-        path: ${{ runner.temp }}/Desktop/BedrockGUI-Bungee-*.jar
+        path: bungeecord/build/libs/BedrockGUI-Bungee-*.jar
 
     - name: Upload Paper JAR as artifact
       uses: actions/upload-artifact@v3
       with:
         name: BedrockGUI-Paper
-        path: ${{ runner.temp }}/Desktop/BedrockGUI-Paper-*.jar
+        path: paper/build/libs/BedrockGUI-Paper-*.jar
 
   release:
     needs: build

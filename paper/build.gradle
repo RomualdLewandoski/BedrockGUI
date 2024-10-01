@@ -29,7 +29,6 @@ sourceSets {
         }
         resources {
             srcDirs = ['src/main/resources']
-            // Include common module resources
             srcDirs += project(':common').sourceSets.main.resources.srcDirs
         }
     }
@@ -57,14 +56,12 @@ processResources {
     inputs.properties props
     filteringCharset 'UTF-8'
 
-    // Include common resources
     from(project(':common').sourceSets.main.resources)
 
     filesMatching('plugin.yml') {
         expand props
     }
 
-    // Set the strategy for duplicate resources
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
@@ -73,5 +70,5 @@ shadowJar {
     minimize()
     archiveClassifier.set('')
     archiveBaseName.set('BedrockGUI-Paper')
-    destinationDirectory.set(file("${System.getProperty('user.home')}/Desktop"))
+    //destinationDirectory.set(file("${System.getProperty('user.home')}/Desktop"))
 }

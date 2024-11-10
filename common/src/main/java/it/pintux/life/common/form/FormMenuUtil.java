@@ -12,12 +12,14 @@ import org.geysermc.cumulus.util.FormImage;
 import org.geysermc.floodgate.api.FloodgateApi;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 public class FormMenuUtil {
 
     private final Map<String, FormMenu> formMenus;
     private final FormConfig config;
     private final MessageData messageData;
+    private final Logger logger = Logger.getLogger(FormMenuUtil.class.getName());
 
     public FormMenuUtil(FormConfig config, MessageData messageData) {
         this.config = config;
@@ -43,7 +45,7 @@ public class FormMenuUtil {
                 }
                 if (type.equalsIgnoreCase("MODAL")) {
                     if (buttons.size() != 2) {
-                        System.out.println("Modal's must only have 2 buttons! Please modify menu." + key);
+                        logger.info("Modal's must only have 2 buttons! Please modify menu." + key);
                         continue;
                     }
                 }
@@ -61,7 +63,7 @@ public class FormMenuUtil {
 
             FormMenu menu = new FormMenu(command, permission, title, description, type, buttons, components, globalActions);
             formMenus.put(key.toLowerCase(), menu);
-            System.out.println("Loaded form menu: " + key + " type: " + type);
+            logger.info("Loaded form menu: " + key + " type: " + type);
         }
     }
 

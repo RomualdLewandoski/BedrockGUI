@@ -5,6 +5,7 @@ import it.pintux.life.bungee.utils.BungeeMessageConfig;
 import it.pintux.life.bungee.utils.BungeePlayer;
 import it.pintux.life.common.FloodgateUtil;
 import it.pintux.life.common.form.FormMenuUtil;
+import it.pintux.life.common.utils.FormPlayer;
 import it.pintux.life.common.utils.MessageConfig;
 import it.pintux.life.common.utils.MessageData;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -70,7 +71,7 @@ public class BedrockGUI extends Plugin implements Listener {
         if (!(event.isCommand()) || !(event.isProxyCommand())) {
             return;
         }
-        BungeePlayer player = new BungeePlayer((ProxiedPlayer) event.getSender());
+        FormPlayer player = new BungeePlayer((ProxiedPlayer) event.getSender());
 
         if (!FloodgateUtil.isFloodgate(player.getUniqueId())) {
             return;

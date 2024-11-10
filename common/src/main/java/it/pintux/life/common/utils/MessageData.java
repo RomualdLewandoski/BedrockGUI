@@ -1,6 +1,7 @@
 package it.pintux.life.common.utils;
 
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,7 +14,7 @@ public class MessageData {
     public static String MENU_ARGS = "menu.arguments";
     public static String MENU_NOT_FOUND = "menu.notFound";
 
-    private static final Pattern hexPattern = Pattern.compile("<#([A-Fa-f0-9]){6}>");
+    private final Logger logger = Logger.getLogger(MessageData.class.getName());
 
     private static MessageConfig config;
 
@@ -28,7 +29,7 @@ public class MessageData {
     }
 
     public String getValue(String key, Map<String, Object> replacements, FormPlayer player) {
-        String prefix = getValueFrom("prefix");
+        String prefix = getValueFrom(PREFIX);
         String value = getValueNoPrefix(key, replacements, player);
         return prefix.concat(" ").concat(value);
     }
@@ -52,12 +53,14 @@ public class MessageData {
             }
         }
 
-        value = config.setPlaceholders(player, value);
+        if (player != null) {
+            value = config.setPlaceholders(player, value);
+        }
 
         Matcher matcher = Pattern.compile("\\{(\\w+)}").matcher(value);
         while (matcher.find()) {
             String placeholder = matcher.group(1);
-            System.out.println("Missing replacement value for placeholder: " + placeholder);
+            logger.info("Missing replacement value for placeholder: " + placeholder);
         }
 
         return value;

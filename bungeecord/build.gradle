@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'it.pintux'
-version = '1.6.0'
+version = '1.7.1'
 
 repositories {
     mavenCentral()
@@ -52,7 +52,7 @@ processResources {
 
     from(project(':common').sourceSets.main.resources)
 
-    filesMatching('plugin.yml') {
+    filesMatching('bungee.yml') {
         expand props
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE

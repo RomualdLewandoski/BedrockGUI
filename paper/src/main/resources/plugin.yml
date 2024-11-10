@@ -10,6 +10,5 @@ softdepend:
 commands:
   bedrockgui:
     usage: "/bedrockgui <reload | open>"
-    permission: "bedrockgui.admin"
     aliases:
       - "bgui"

@@ -2,6 +2,7 @@ package it.pintux.life.paper;
 
 import it.pintux.life.common.FloodgateUtil;
 import it.pintux.life.common.form.FormMenuUtil;
+import it.pintux.life.common.utils.FormPlayer;
 import it.pintux.life.common.utils.MessageConfig;
 import it.pintux.life.common.utils.MessageData;
 import it.pintux.life.paper.utils.PaperConfig;
@@ -49,7 +50,7 @@ public final class BedrockGUI extends JavaPlugin implements Listener {
     @EventHandler
     public void onCmd(ServerCommandEvent event) {
         if (!(event.getSender() instanceof Player)) return;
-        PaperPlayer player = new PaperPlayer((Player) event.getSender());
+        FormPlayer player = new PaperPlayer((Player) event.getSender());
         String command = event.getCommand();
 
         formMenuUtil.getFormMenus().forEach((key, formMenu) -> {
@@ -90,7 +91,7 @@ public final class BedrockGUI extends JavaPlugin implements Listener {
                     int requiredArgs = formCommandParts.length - 1;
                     if (args.length >= requiredArgs) {
                         event.setCancelled(true);
-                        PaperPlayer player1 = new PaperPlayer(event.getPlayer());
+                        FormPlayer player1 = new PaperPlayer(event.getPlayer());
                         formMenuUtil.openForm(player1, key, args);
                     } else {
                         player.sendMessage(messageData.getValue(MessageData.MENU_ARGS, Map.of("args", requiredArgs), null));

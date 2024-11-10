@@ -2,9 +2,11 @@ package it.pintux.life.bungee;
 
 import it.pintux.life.bungee.utils.BungeePlayer;
 import it.pintux.life.common.FloodgateUtil;
+import it.pintux.life.common.utils.FormPlayer;
 import it.pintux.life.common.utils.MessageData;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
@@ -21,44 +23,77 @@ public class BedrockCommand extends Command implements TabExecutor {
     private final BedrockGUI plugin;
 
     public BedrockCommand(BedrockGUI plugin, String name) {
-        super(name, "bedrockgui.admin", "bguiproxy");
+        super(name, "", "bguiproxy");
         this.plugin = plugin;
     }
 
     @Override
-    public void execute(CommandSender commandSender, String[] strings) {
-        if (!(commandSender instanceof ProxiedPlayer))
-            return;
-        ProxiedPlayer player = (ProxiedPlayer) commandSender;
+    public void execute(CommandSender sender, String[] strings) {
         if (strings.length == 0) {
-            player.sendMessage(ChatColor.RED + "Usage: /bgui reload");
-            player.sendMessage(ChatColor.RED + "Usage: /bgui open <menu_name>");
+            sender.sendMessage(ChatColor.RED + "Usage: /bgui reload");
+            sender.sendMessage(ChatColor.RED + "Usage: /bgui open <menu_name>");
+            sender.sendMessage(ChatColor.RED + "Usage: /bgui openfor <player> <menu_name> [arguments]");
             return;
         }
+
         String arg = strings[0];
+
         if (arg.equalsIgnoreCase("reload")) {
-            if (!player.hasPermission("bedrockgui.admin")) {
-                player.sendMessage(plugin.getMessageData().getValue(MessageData.NO_PEX, null, null));
-                return;
-            }
-            plugin.reloadData();
-            player.sendMessage(ChatColor.GREEN + "Reloaded BedrockGUI!");
-            return;
-        }
-        if (arg.equalsIgnoreCase("open")) {
-            if (strings.length < 2) {
-                player.sendMessage(ChatColor.RED + "Usage: /bgui open <menu_name> [arguments]");
+            if (sender instanceof ProxiedPlayer && !sender.hasPermission("bedrockgui.admin")) {
+                sender.sendMessage(plugin.getMessageData().getValue(MessageData.NO_PEX, null, null));
                 return;
             }
 
-            if (!FloodgateUtil.isFloodgate(player.getUniqueId())) {
-                player.sendMessage(plugin.getMessageData().getValue(MessageData.MENU_NOJAVA, null, null));
+            plugin.reloadData();
+            sender.sendMessage(ChatColor.GREEN + "Reloaded BedrockGUI!");
+            return;
+        }
+
+        if (arg.equalsIgnoreCase("open")) {
+            if (sender instanceof ProxiedPlayer) {
+                ProxiedPlayer player = (ProxiedPlayer) sender;
+                if (strings.length < 2) {
+                    sender.sendMessage(ChatColor.RED + "Usage: /bgui open <menu_name> [arguments]");
+                    return;
+                }
+
+                if (!FloodgateUtil.isFloodgate(player.getUniqueId())) {
+                    sender.sendMessage(plugin.getMessageData().getValue(MessageData.MENU_NOJAVA, null, null));
+                    return;
+                }
+
+                String menuName = strings[1];
+                String[] menuArgs = Arrays.copyOfRange(strings, 2, strings.length);
+                FormPlayer formPlayer = new BungeePlayer(player);
+                plugin.getFormMenuUtil().openForm(formPlayer, menuName, menuArgs);
+            }
+            return;
+        }
+
+        if (arg.equalsIgnoreCase("openfor")) {
+            if (strings.length < 3) {
+                sender.sendMessage(ChatColor.RED + "Usage: /bgui openfor <player> <menu_name> [arguments]");
                 return;
             }
-            String menuName = strings[1];
-            String[] menuArgs = Arrays.copyOfRange(strings, 2, strings.length);
-            BungeePlayer player1 = new BungeePlayer(player);
-            plugin.getFormMenuUtil().openForm(player1, menuName, menuArgs);
+
+            String playerName = strings[1];
+            String menuName = strings[2];
+            String[] menuArgs = Arrays.copyOfRange(strings, 3, strings.length);
+
+            ProxiedPlayer targetPlayer = ProxyServer.getInstance().getPlayer(playerName);
+            if (targetPlayer == null) {
+                sender.sendMessage(ChatColor.RED + "Player '" + playerName + "' is not online.");
+                return;
+            }
+
+            if (!FloodgateUtil.isFloodgate(targetPlayer.getUniqueId())) {
+                sender.sendMessage(plugin.getMessageData().getValue(MessageData.MENU_NOJAVA, null, null));
+                return;
+            }
+
+            FormPlayer formPlayer = new BungeePlayer(targetPlayer);
+            plugin.getFormMenuUtil().openForm(formPlayer, menuName, menuArgs);
+            sender.sendMessage(ChatColor.GREEN + "Opened menu '" + menuName + "' for player '" + playerName + "'.");
         }
     }
 
@@ -69,7 +104,9 @@ public class BedrockCommand extends Command implements TabExecutor {
         }
 
         if (!commandSender.hasPermission("bedrockgui.admin")) {
-            return new ArrayList<>();
+            List<String> commands = new ArrayList<>();
+            commands.add("open");
+            return commands;
         }
 
         if (strings.length == 1) {

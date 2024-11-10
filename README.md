@@ -1,4 +1,4 @@
-# BedrockGUI Plugin for spigot / paper forks
+# BedrockGUI Plugin for spigot / paper forks and Bungeecord and his forks!
 
 [Spigot page](https://www.spigotmc.org/resources/bedrockgui.119592/)
 
@@ -8,15 +8,16 @@ This is a simple Minecraft plugin that allows servers to create custom GUI menus
 
 ## Features
 - Create custom GUIs for Bedrock players.
-- Support for both `SimpleForm` and `ModalForm`.
+- Support for both `SimpleForm`, `ModalForm` and `CustomForm`@
 - Easy integration with Geyser and Floodgate to manage Bedrock-specific forms.
 - YAML-based configuration for defining menus and actions.
 
 ## Requirements
 - Minecraft Server (Paper, Spigot, etc.)
+- Minecraft Proxy (Bungeecord and forks)
 - [Floodgate](https://github.com/GeyserMC/Floodgate)
 - (Optional) [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) for placeholders
-- Java 8+ (for server-side plugin)
+- Java 17+ (for server-side plugin)
 
 ## Installation
 
@@ -24,7 +25,7 @@ This is a simple Minecraft plugin that allows servers to create custom GUI menus
 2. Place the plugin JAR in your server's `plugins` folder.
 3. Restart your server.
 4. Configure the menus in the `config.yml` file.
-5. Run `/bgui reload` to reload menus after making configuration changes.
+5. Run `/bgui (or /bguiproxy on bungee) reload` to reload menus after making configuration changes.
 
 ## Compiling from Source
 
@@ -49,13 +50,7 @@ If you want to clone and compile a custom version of this plugin, follow the ste
     ./gradlew shadowJar
     ```
 
-3. After the build completes, the plugin JAR will be available in the `Desktop` directory.
-
-    ```bash
-    ls Desktop
-    ```
-
-4. Copy the generated JAR file into your server's `plugins` folder.
+3. Copy the generated JAR file into your server's `plugins` folder.
 
 ### Customizing
 

@@ -1,6 +1,7 @@
 # BedrockGUI Plugin for spigot / paper forks and Bungeecord and his forks!
 
 [Spigot page](https://www.spigotmc.org/resources/bedrockgui.119592/)
+[Discord](https://discord.gg/FD2MTETnyQ)
 
 This is a simple Minecraft plugin that allows servers to create custom GUI menus for Bedrock players who play on Java servers through [Geyser](https://geysermc.org/). This plugin leverages the Floodgate API to build GUIs that are accessible to Bedrock players, giving server admins the flexibility to create forms and menus for Bedrock players.
 

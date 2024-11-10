@@ -41,7 +41,7 @@ public class BedrockCommand implements CommandExecutor, TabCompleter {
         String arg = args[0];
 
         if (arg.equalsIgnoreCase("reload")) {
-            if (sender instanceof Player && !sender.hasPermission("bedrockgui.admin")) {
+            if (!sender.hasPermission("bedrockgui.admin")) {
                 sender.sendMessage(plugin.getMessageData().getValue(MessageData.NO_PEX, null, null));
                 return true;
             }
@@ -73,6 +73,10 @@ public class BedrockCommand implements CommandExecutor, TabCompleter {
         }
 
         if (arg.equalsIgnoreCase("openfor")) {
+            if (!sender.hasPermission("bedrockgui.admin")) {
+                sender.sendMessage(plugin.getMessageData().getValue(MessageData.NO_PEX, null, null));
+                return true;
+            }
             if (args.length < 3) {
                 sender.sendMessage(ChatColor.RED + "Usage: /bgui openfor <player> <menu_name> [arguments]");
                 return true;

@@ -39,7 +39,7 @@ public class BedrockCommand extends Command implements TabExecutor {
         String arg = strings[0];
 
         if (arg.equalsIgnoreCase("reload")) {
-            if (sender instanceof ProxiedPlayer && !sender.hasPermission("bedrockgui.admin")) {
+            if (!sender.hasPermission("bedrockgui.admin")) {
                 sender.sendMessage(plugin.getMessageData().getValue(MessageData.NO_PEX, null, null));
                 return;
             }
@@ -71,6 +71,10 @@ public class BedrockCommand extends Command implements TabExecutor {
         }
 
         if (arg.equalsIgnoreCase("openfor")) {
+            if (!sender.hasPermission("bedrockgui.admin")) {
+                sender.sendMessage(plugin.getMessageData().getValue(MessageData.NO_PEX, null, null));
+                return;
+            }
             if (strings.length < 3) {
                 sender.sendMessage(ChatColor.RED + "Usage: /bgui openfor <player> <menu_name> [arguments]");
                 return;

@@ -30,9 +30,9 @@ public class BedrockCommand extends Command implements TabExecutor {
     @Override
     public void execute(CommandSender sender, String[] strings) {
         if (strings.length == 0) {
-            sender.sendMessage(ChatColor.RED + "Usage: /bgui reload");
-            sender.sendMessage(ChatColor.RED + "Usage: /bgui open <menu_name>");
-            sender.sendMessage(ChatColor.RED + "Usage: /bgui openfor <player> <menu_name> [arguments]");
+            sender.sendMessage(ChatColor.RED + "Usage: /bguiproxy reload");
+            sender.sendMessage(ChatColor.RED + "Usage: /bguiproxy open <menu_name>");
+            sender.sendMessage(ChatColor.RED + "Usage: /bguiproxy openfor <player> <menu_name> [arguments]");
             return;
         }
 
@@ -53,7 +53,7 @@ public class BedrockCommand extends Command implements TabExecutor {
             if (sender instanceof ProxiedPlayer) {
                 ProxiedPlayer player = (ProxiedPlayer) sender;
                 if (strings.length < 2) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /bgui open <menu_name> [arguments]");
+                    sender.sendMessage(ChatColor.RED + "Usage: /bguiproxy open <menu_name> [arguments]");
                     return;
                 }
 
@@ -76,7 +76,7 @@ public class BedrockCommand extends Command implements TabExecutor {
                 return;
             }
             if (strings.length < 3) {
-                sender.sendMessage(ChatColor.RED + "Usage: /bgui openfor <player> <menu_name> [arguments]");
+                sender.sendMessage(ChatColor.RED + "Usage: /bguiproxy openfor <player> <menu_name> [arguments]");
                 return;
             }
 

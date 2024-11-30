@@ -359,7 +359,7 @@ public class FormMenuUtil {
             text = text.replace("$" + entry.getKey(), entry.getValue());
         }
 
-        return text;
+        return messageData.applyColor(text);
     }
 
     public Map<String, FormMenu> getFormMenus() {

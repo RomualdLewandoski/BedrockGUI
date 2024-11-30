@@ -52,10 +52,7 @@ public class MessageData {
                 value = value.replace(placeholder, String.valueOf(entry.getValue()));
             }
         }
-
-        if (player != null) {
-            value = config.setPlaceholders(player, value);
-        }
+        value = config.setPlaceholders(player, value);
 
         Matcher matcher = Pattern.compile("\\{(\\w+)}").matcher(value);
         while (matcher.find()) {

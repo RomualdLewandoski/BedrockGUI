@@ -1,6 +1,7 @@
 package it.pintux.life.paper;
 
 import it.pintux.life.common.FloodgateUtil;
+import it.pintux.life.common.api.BedrockGuiAPI;
 import it.pintux.life.common.form.FormMenuUtil;
 import it.pintux.life.common.utils.FormPlayer;
 import it.pintux.life.common.utils.MessageConfig;
@@ -24,6 +25,8 @@ public final class BedrockGUI extends JavaPlugin implements Listener {
 
     private FormMenuUtil formMenuUtil;
     private MessageData messageData;
+    private static BedrockGUI instance;
+    private BedrockGuiAPI api;
 
     @Override
     public void onEnable() {
@@ -32,10 +35,12 @@ public final class BedrockGUI extends JavaPlugin implements Listener {
         saveDefaultConfig();
         reloadData();
         new Metrics(this, 23364);
+        instance = this;
     }
 
     @Override
     public void onDisable() {
+        instance = null;
     }
 
     public void reloadData() {
@@ -101,6 +106,9 @@ public final class BedrockGUI extends JavaPlugin implements Listener {
         });
     }
 
+    public static BedrockGUI getInstance() {
+        return instance;
+    }
 
     public FormMenuUtil getFormMenuUtil() {
         return formMenuUtil;
@@ -108,5 +116,12 @@ public final class BedrockGUI extends JavaPlugin implements Listener {
 
     public MessageData getMessageData() {
         return messageData;
+    }
+
+    public BedrockGuiAPI getApi() {
+        if (api == null) {
+            api = new BedrockGuiAPI(formMenuUtil);
+        }
+        return api;
     }
 }

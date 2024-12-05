@@ -4,6 +4,7 @@ import it.pintux.life.bungee.utils.BungeeConfig;
 import it.pintux.life.bungee.utils.BungeeMessageConfig;
 import it.pintux.life.bungee.utils.BungeePlayer;
 import it.pintux.life.common.FloodgateUtil;
+import it.pintux.life.common.api.BedrockGuiAPI;
 import it.pintux.life.common.form.FormMenuUtil;
 import it.pintux.life.common.utils.FormPlayer;
 import it.pintux.life.common.utils.MessageConfig;
@@ -32,6 +33,8 @@ public class BedrockGUI extends Plugin implements Listener {
     private MessageData messageData;
     private Configuration mainConfig;
     private Configuration messageConfig;
+    private static BedrockGUI instance;
+    private BedrockGuiAPI api;
 
     @Override
     public void onEnable() {
@@ -45,10 +48,12 @@ public class BedrockGUI extends Plugin implements Listener {
         }
         reloadData();
         new Metrics(this, 23364);
+        instance = this;
     }
 
     @Override
     public void onDisable() {
+        instance = null;
     }
 
     public void reloadData() {
@@ -119,6 +124,9 @@ public class BedrockGUI extends Plugin implements Listener {
         }
     }
 
+    public static BedrockGUI getInstance() {
+        return instance;
+    }
 
     public FormMenuUtil getFormMenuUtil() {
         return formMenuUtil;
@@ -126,5 +134,12 @@ public class BedrockGUI extends Plugin implements Listener {
 
     public MessageData getMessageData() {
         return messageData;
+    }
+
+    public BedrockGuiAPI getApi() {
+        if (api == null) {
+            api = new BedrockGuiAPI(formMenuUtil);
+        }
+        return api;
     }
 }

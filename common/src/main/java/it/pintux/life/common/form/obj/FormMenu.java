@@ -9,12 +9,12 @@ public class FormMenu {
     private String permission;
     private String formTitle;
     private String formContent;
-    private String formType;
+    private FormMenuType formType;
     private List<FormButton> formButtons;
-    private Map<String, Map<String, Object>> components;
+    private List<FormComponent> components;
     private List<String> globalActions;
 
-    public FormMenu(String formCommand, String permission, String formTitle, String formContent, String formType, List<FormButton> formButtons, Map<String, Map<String, Object>> components, List<String> globalActions) {
+    public FormMenu(String formCommand, String permission, String formTitle, String formContent, FormMenuType formType, List<FormButton> formButtons, List<FormComponent> components, List<String> globalActions) {
         this.formCommand = formCommand;
         this.permission = permission;
         this.formTitle = formTitle;
@@ -57,11 +57,11 @@ public class FormMenu {
         this.formContent = formContent;
     }
 
-    public String getFormType() {
+    public FormMenuType getFormType() {
         return formType;
     }
 
-    public void setFormType(String formType) {
+    public void setFormType(FormMenuType formType) {
         this.formType = formType;
     }
 
@@ -73,11 +73,11 @@ public class FormMenu {
         this.formButtons = formButtons;
     }
 
-    public Map<String, Map<String, Object>> getComponents() {
+    public List<FormComponent> getComponents() {
         return components;
     }
 
-    public void setComponents(Map<String, Map<String, Object>> components) {
+    public void setComponents(List<FormComponent> components) {
         this.components = components;
     }
 
@@ -93,10 +93,13 @@ public class FormMenu {
     public String toString() {
         return new StringJoiner(", ", FormMenu.class.getSimpleName() + "[", "]")
                 .add("formCommand='" + formCommand + "'")
+                .add("permission='" + permission + "'")
                 .add("formTitle='" + formTitle + "'")
                 .add("formContent='" + formContent + "'")
-                .add("formType='" + formType + "'")
+                .add("formType=" + formType)
                 .add("formButtons=" + formButtons)
+                .add("components=" + components)
+                .add("globalActions=" + globalActions)
                 .toString();
     }
 }

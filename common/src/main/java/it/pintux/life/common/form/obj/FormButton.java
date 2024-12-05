@@ -1,16 +1,19 @@
 package it.pintux.life.common.form.obj;
 
+import it.pintux.life.common.utils.FormPlayer;
+
 import java.util.StringJoiner;
+import java.util.function.BiConsumer;
 
 public class FormButton {
     private String text;
     private String image;
-    private String onClick;
+    private final BiConsumer<FormPlayer, String> callback;
 
-    public FormButton(String text, String image, String onClick) {
+    public FormButton(String text, String image, BiConsumer<FormPlayer, String> callback) {
         this.text = text;
         this.image = image;
-        this.onClick = onClick;
+        this.callback = callback;
     }
 
     public String getText() {
@@ -29,12 +32,14 @@ public class FormButton {
         this.image = image;
     }
 
-    public String getOnClick() {
-        return onClick;
+    public BiConsumer<FormPlayer, String> getCallback() {
+        return callback;
     }
 
-    public void setOnClick(String onClick) {
-        this.onClick = onClick;
+    public void executeCallback(FormPlayer player, String value) {
+        if (callback != null) {
+            callback.accept(player, value);
+        }
     }
 
     @Override
@@ -42,7 +47,7 @@ public class FormButton {
         return new StringJoiner(", ", FormButton.class.getSimpleName() + "[", "]")
                 .add("text='" + text + "'")
                 .add("image='" + image + "'")
-                .add("onClick='" + onClick + "'")
+                .add("callback=" + callback)
                 .toString();
     }
 }

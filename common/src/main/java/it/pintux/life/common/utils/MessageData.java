@@ -13,6 +13,7 @@ public class MessageData {
     public static String MENU_NOJAVA = "menu.noJava";
     public static String MENU_ARGS = "menu.arguments";
     public static String MENU_NOT_FOUND = "menu.notFound";
+    public static String MENU_INVALID_OPEN_ACTION = "menu.invalidOpenAction";
 
     private final Logger logger = Logger.getLogger(MessageData.class.getName());
 

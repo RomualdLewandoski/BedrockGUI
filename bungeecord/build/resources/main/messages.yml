@@ -5,3 +5,4 @@ menu:
   noJava: "&4You are not a bedrock player. Please open this menu only from bedrock client"
   arguments: "&4This command requires at least {args} arguments."
   notFound: "&cNo menu found with this name"
+  invalidOpenAction: "Invalid open action: no menu specified."

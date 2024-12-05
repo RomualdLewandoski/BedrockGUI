@@ -348,7 +348,7 @@ public class FormMenuUtil {
     }
 
     private boolean validateCommandArguments(String command, String[] args, FormPlayer player) {
-        if (command == null || command.isEmpty()) {
+        if (command == null || command.isEmpty() || args == null || args.length == 0) {
             return true;
         }
         int requiredArgs = countPlaceholders(command);

@@ -117,8 +117,10 @@ public class FormMenuUtil {
         FormMenuType type = menu.getFormType();
 
         Map<String, String> placeholders = new HashMap<>();
-        for (int i = 0; i < args.length; i++) {
-            placeholders.put(String.valueOf(i + 1), args[i]);
+        if (args != null && args.length > 0) {
+            for (int i = 0; i < args.length; i++) {
+                placeholders.put(String.valueOf(i + 1), args[i]);
+            }
         }
 
         switch (type) {

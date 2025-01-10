@@ -11,7 +11,6 @@ import it.pintux.life.common.utils.MessageConfig;
 import it.pintux.life.common.utils.MessageData;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
-import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
@@ -31,8 +30,6 @@ public class BedrockGUI extends Plugin implements Listener {
 
     private FormMenuUtil formMenuUtil;
     private MessageData messageData;
-    private Configuration mainConfig;
-    private Configuration messageConfig;
     private static BedrockGUI instance;
     private BedrockGuiAPI api;
 
@@ -57,6 +54,8 @@ public class BedrockGUI extends Plugin implements Listener {
     }
 
     public void reloadData() {
+        Configuration mainConfig;
+        Configuration messageConfig;
         try {
             mainConfig = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(getDataFolder(), "config.yml"));
             messageConfig = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(getDataFolder(), "messages.yml"));

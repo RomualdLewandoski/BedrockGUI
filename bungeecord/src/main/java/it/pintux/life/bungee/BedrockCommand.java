@@ -64,6 +64,10 @@ public class BedrockCommand extends Command implements TabExecutor {
 
                 String menuName = strings[1];
                 String[] menuArgs = Arrays.copyOfRange(strings, 2, strings.length);
+                if (!plugin.getFormMenuUtil().checkServerRequirement(player.hasPermission("bedrockgui.bypass"), player.getServer().getInfo().getName(), menuName)) {
+                    sender.sendMessage(plugin.getMessageData().getValue(MessageData.MENU_NOPEX, null, null));
+                    return;
+                }
                 FormPlayer formPlayer = new BungeePlayer(player);
                 plugin.getFormMenuUtil().openForm(formPlayer, menuName, menuArgs);
             }
@@ -94,7 +98,10 @@ public class BedrockCommand extends Command implements TabExecutor {
                 sender.sendMessage(plugin.getMessageData().getValue(MessageData.MENU_NOJAVA, null, null));
                 return;
             }
-
+            if (!plugin.getFormMenuUtil().checkServerRequirement(targetPlayer.hasPermission("bedrockgui.bypass"), targetPlayer.getServer().getInfo().getName(), menuName)) {
+                sender.sendMessage(plugin.getMessageData().getValue(MessageData.MENU_NOPEX, null, null));
+                return;
+            }
             FormPlayer formPlayer = new BungeePlayer(targetPlayer);
             plugin.getFormMenuUtil().openForm(formPlayer, menuName, menuArgs);
             sender.sendMessage(ChatColor.GREEN + "Opened menu '" + menuName + "' for player '" + playerName + "'.");

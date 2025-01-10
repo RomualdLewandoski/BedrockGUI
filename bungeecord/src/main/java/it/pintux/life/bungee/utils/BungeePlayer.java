@@ -2,7 +2,6 @@ package it.pintux.life.bungee.utils;
 
 import it.pintux.life.common.utils.FormPlayer;
 import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;

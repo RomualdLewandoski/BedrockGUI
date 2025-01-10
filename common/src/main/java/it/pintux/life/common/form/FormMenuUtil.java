@@ -1,9 +1,6 @@
 package it.pintux.life.common.form;
 
-import it.pintux.life.common.form.obj.FormButton;
-import it.pintux.life.common.form.obj.FormComponent;
-import it.pintux.life.common.form.obj.FormMenu;
-import it.pintux.life.common.form.obj.FormMenuType;
+import it.pintux.life.common.form.obj.*;
 import it.pintux.life.common.utils.FormConfig;
 import it.pintux.life.common.utils.FormPlayer;
 import it.pintux.life.common.utils.MessageData;
@@ -22,7 +19,7 @@ public class FormMenuUtil {
     private final Map<String, FormMenu> formMenus;
     private final FormConfig config;
     private final MessageData messageData;
-    private final Logger logger = Logger.getLogger(FormMenuUtil.class.getName());
+    private final Logger logger = Logger.getLogger(FormMenuUtil.class.getSimpleName());
     private final Map<String, BiConsumer<FormPlayer, String>> buttonCallbacks;
 
     public FormMenuUtil(FormConfig config, MessageData messageData) {
@@ -36,6 +33,7 @@ public class FormMenuUtil {
 
     private void loadFormMenus() {
         for (String key : config.getKeys("menu")) {
+            String server = config.getString("menu." + key + ".server");
             String command = config.getString("menu." + key + ".command");
             String permission = config.getString("menu." + key + ".permission");
             String type = config.getString("menu." + key + ".type", "SIMPLE");
@@ -86,14 +84,41 @@ public class FormMenuUtil {
                 for (String componentKey : config.getKeys("menu." + key + ".components")) {
                     String componentType = config.getString("menu." + key + ".components." + componentKey + ".type");
                     Map<String, Object> properties = config.getValues("menu." + key + ".components." + componentKey);
+                    String action = (String) properties.get("action");
 
-                    components.add(new FormComponent(componentKey, componentType, properties));
+                    BiConsumer<FormPlayer, Object> callback = null;
+                    if (action != null) {
+                        String[] actionParts = action.split(" ", 2);
+                        String actionType = actionParts[0];
+                        String actionValue = actionParts.length > 1 ? actionParts[1] : "";
+                        callback = (player, value) -> {
+                            String resolvedAction = replacePlaceholders(actionValue, Map.of(), player);
+                            BiConsumer<FormPlayer, String> actionCallback = getCallbackForAction(actionType);
+                            if (actionCallback != null) {
+                                actionCallback.accept(player, resolvedAction);
+                            }
+                        };
+                    }
+
+                    components.add(new FormComponent(componentKey, componentType, properties, callback));
                 }
             }
 
-            List<String> globalActions = config.getStringList("menu." + key + ".global_actions");
+            List<FormAction> globalActions = new ArrayList<>();
+            for (String action : config.getStringList("menu." + key + ".global_actions")) {
+                String[] actionParts = action.split(" ", 2);
+                String actionName = actionParts[0];
+                String actionValue = actionParts.length > 1 ? actionParts[1] : "";
 
-            FormMenu menu = new FormMenu(command, permission, title, description, menuType, buttons, components, globalActions);
+                BiConsumer<FormPlayer, String> callback = getCallbackForAction(actionName);
+                if (callback != null) {
+                    globalActions.add(new FormAction(actionValue, callback));
+                } else {
+                    logger.warning("Unknown global action: " + actionName + " in menu: " + key);
+                }
+            }
+
+            FormMenu menu = new FormMenu(command, server, permission, title, description, menuType, buttons, components, globalActions);
             formMenus.put(key.toLowerCase(), menu);
             logger.info("Loaded form menu: " + key + " type: " + type);
         }
@@ -139,6 +164,18 @@ public class FormMenuUtil {
     public void openForm(FormPlayer player, String menuName, String[] args) {
         FormMenu menu = formMenus.get(menuName.toLowerCase());
         openForm(player, menu, args);
+    }
+
+    public boolean checkServerRequirement(boolean hasPex, String server, String menuName) {
+        FormMenu menu = formMenus.get(menuName.toLowerCase());
+        if (menu == null) {
+            return true;
+        }
+        String savedServer = menu.getServer();
+        if (savedServer == null) {
+            return true;
+        }
+        return savedServer.equalsIgnoreCase(server) || hasPex;
     }
 
     private void openModalForm(FormPlayer player, FormMenu formMenu, Map<String, String> placeholders) {
@@ -215,111 +252,118 @@ public class FormMenuUtil {
 
     private List<BiConsumer<FormPlayer, Map<String, Object>>> handleGlobalCallbacks(FormMenu formMenu, Map<String, String> placeholders) {
         List<BiConsumer<FormPlayer, Map<String, Object>>> globalCallbacks = new ArrayList<>();
-        for (String globalAction : formMenu.getGlobalActions()) {
+        for (FormAction globalAction : formMenu.getGlobalActions()) {
             globalCallbacks.add((formPlayer, results) -> {
-                String resolvedAction = replacePlaceholders(globalAction, placeholders, formPlayer);
-                rezolveAction(formPlayer, resolvedAction);
+                String resolvedAction = replacePlaceholders(globalAction.getAction(), placeholders, formPlayer);
+                globalAction.executeCallback(formPlayer, resolvedAction);
             });
         }
         return globalCallbacks;
     }
 
-
     private void openCustomForm(FormPlayer player, FormMenu formMenu, Map<String, String> placeholders) {
         String title = replacePlaceholders(formMenu.getFormTitle(), placeholders, player);
+
         CustomForm.Builder formBuilder = CustomForm.builder().title(title);
+        Map<Integer, String> perComponentActionMap = new HashMap<>();
 
-        Map<Integer, BiConsumer<FormPlayer, String>> componentCallbacks = new HashMap<>();
         Map<String, Object> componentResults = new HashMap<>();
-        List<BiConsumer<FormPlayer, Map<String, Object>>> globalCallbacks = new ArrayList<>();
-        int[] componentIndex = {0};
 
+        int componentIndex = 0;
         for (FormComponent component : formMenu.getComponents()) {
             String type = component.getType().toLowerCase();
-            Map<String, Object> properties = component.getProperties();
-            String componentKey = component.getKey();
+            Map<String, Object> props = component.getProperties();
+
+            String text = replacePlaceholders((String) props.get("text"), placeholders, player);
 
             switch (type) {
-                case "input":
-                    String inputText = replacePlaceholders((String) properties.get("text"), placeholders, player);
-                    String placeholder = (String) properties.getOrDefault("placeholder", "");
-                    String defaultValue = (String) properties.getOrDefault("default", "");
-                    formBuilder.input(inputText, placeholder, defaultValue);
-                    componentCallbacks.put(componentIndex[0], getCallbackForAction((String) properties.get("action")));
-                    componentResults.put(componentKey, "");
+                case "input": {
+                    String placeholder = (String) props.getOrDefault("placeholder", "");
+                    String defaultVal = (String) props.getOrDefault("default", "");
+                    formBuilder.input(text, placeholder, defaultVal);
                     break;
-                case "slider":
-                    String sliderText = replacePlaceholders((String) properties.get("text"), placeholders, player);
-                    int min = (int) properties.get("min");
-                    int max = (int) properties.get("max");
-                    int step = (int) properties.get("step");
-                    int defaultSlider = (int) properties.get("default");
-                    formBuilder.slider(sliderText, min, max, step, defaultSlider);
-                    componentCallbacks.put(componentIndex[0], getCallbackForAction((String) properties.get("action")));
-                    componentResults.put(componentKey, 0);
+                }
+                case "slider": {
+                    int min = (int) props.get("min");
+                    int max = (int) props.get("max");
+                    int step = (int) props.get("step");
+                    int defaultSlider = (int) props.get("default");
+                    formBuilder.slider(text, min, max, step, defaultSlider);
                     break;
-                case "dropdown":
-                    String dropdownText = replacePlaceholders((String) properties.get("text"), placeholders, player);
-                    List<String> options = (List<String>) properties.get("options");
-                    int defaultDropdown = (int) properties.get("default");
-                    formBuilder.dropdown(dropdownText, options, defaultDropdown);
-                    componentCallbacks.put(componentIndex[0], getCallbackForAction((String) properties.get("action")));
-                    componentResults.put(componentKey, "");
+                }
+                case "dropdown": {
+                    List<String> options = (List<String>) props.get("options");
+                    int defaultDropdown = (int) props.get("default");
+                    formBuilder.dropdown(text, options, defaultDropdown);
                     break;
-                case "toggle":
-                    String toggleText = replacePlaceholders((String) properties.get("text"), placeholders, player);
-                    boolean defaultToggle = (boolean) properties.get("default");
-                    formBuilder.toggle(toggleText, defaultToggle);
-                    componentCallbacks.put(componentIndex[0], getCallbackForAction((String) properties.get("action")));
-                    componentResults.put(componentKey, false);
+                }
+                case "toggle": {
+                    boolean defaultToggle = (boolean) props.get("default");
+                    formBuilder.toggle(text, defaultToggle);
                     break;
+                }
             }
 
-            componentIndex[0]++;
+            String action = (String) props.get("action");
+            if (action != null) {
+                perComponentActionMap.put(componentIndex, action);
+            }
+
+            componentIndex++;
         }
 
-        for (String globalAction : formMenu.getGlobalActions()) {
+        List<BiConsumer<FormPlayer, Map<String, Object>>> globalCallbacks = new ArrayList<>();
+        for (FormAction globalAction : formMenu.getGlobalActions()) {
             globalCallbacks.add((formPlayer, results) -> {
-                String resolvedAction = replaceGlobalPlaceholders(globalAction, results);
-                rezolveAction(formPlayer, resolvedAction);
+                String resolvedAction = replaceGlobalPlaceholders(globalAction.getAction(), results);
+                resolveAction(formPlayer, resolvedAction);
             });
         }
 
         formBuilder.validResultHandler((formResponse, customFormResponse) -> {
-            componentIndex[0] = 0;
-
-            for (FormComponent component : formMenu.getComponents()) {
-                String type = component.getType().toLowerCase();
-                String componentKey = component.getKey();
-                BiConsumer<FormPlayer, String> callback = componentCallbacks.get(componentIndex[0]);
-
+            for (int i = 0; i < formMenu.getComponents().size(); i++) {
+                FormComponent c = formMenu.getComponents().get(i);
+                String type = c.getType().toLowerCase();
+                String componentKey = c.getKey();
                 Object result = null;
+
                 switch (type) {
                     case "input":
-                        result = customFormResponse.asInput(componentIndex[0]);
-                        componentResults.put(componentKey, result);
+                        result = customFormResponse.asInput(i);
                         break;
                     case "slider":
-                        result = customFormResponse.asSlider(componentIndex[0]);
-                        componentResults.put(componentKey, result);
+                        result = (int) customFormResponse.asSlider(i);
                         break;
-                    case "dropdown":
-                        int dropdownIndex = customFormResponse.asDropdown(componentIndex[0]);
-                        List<String> options = (List<String>) component.getProperties().get("options");
-                        result = options.get(dropdownIndex);
-                        componentResults.put(componentKey, result);
+                    case "dropdown": {
+                        int ddIndex = customFormResponse.asDropdown(i);
+                        List<String> options = (List<String>) c.getProperties().get("options");
+                        result = options.get(ddIndex);
                         break;
+                    }
                     case "toggle":
-                        result = customFormResponse.asToggle(componentIndex[0]);
-                        componentResults.put(componentKey, result);
+                        result = customFormResponse.asToggle(i);
                         break;
                 }
 
-                if (callback != null) {
-                    callback.accept(player, result != null ? result.toString() : null);
-                }
+                componentResults.put(componentKey, result);
 
-                componentIndex[0]++;
+                if (perComponentActionMap.containsKey(i)) {
+                    String actionString = perComponentActionMap.get(i);
+
+                    Map<String, String> localPlaceholders = new HashMap<>();
+                    localPlaceholders.put("1", String.valueOf(result));
+
+                    String replacedActionString = replacePlaceholders(actionString, localPlaceholders, player);
+
+                    String[] parts = replacedActionString.split(" ", 2);
+                    String actionName = parts[0].toLowerCase();
+                    String actionValue = parts.length > 1 ? parts[1] : "";
+
+                    BiConsumer<FormPlayer, String> callback = getCallbackForAction(actionName);
+                    if (callback != null) {
+                        callback.accept(player, actionValue);
+                    }
+                }
             }
 
             for (BiConsumer<FormPlayer, Map<String, Object>> globalCallback : globalCallbacks) {
@@ -327,11 +371,11 @@ public class FormMenuUtil {
             }
         });
 
-        CustomForm form = formBuilder.build();
-        FloodgateApi.getInstance().sendForm(player.getUniqueId(), form);
+        FloodgateApi.getInstance().sendForm(player.getUniqueId(), formBuilder.build());
     }
 
-    private void rezolveAction(FormPlayer formPlayer, String resolvedAction) {
+
+    private void resolveAction(FormPlayer formPlayer, String resolvedAction) {
         String[] actionParts = resolvedAction.split(" ", 2);
         String actionType = actionParts[0].toLowerCase();
         String actionValue = actionParts.length > 1 ? actionParts[1] : "";

@@ -1,28 +1,29 @@
 package it.pintux.life.common.form.obj;
 
 import java.util.List;
-import java.util.Map;
 import java.util.StringJoiner;
 
 public class FormMenu {
     private String formCommand;
+    private String server;
     private String permission;
     private String formTitle;
     private String formContent;
     private FormMenuType formType;
     private List<FormButton> formButtons;
     private List<FormComponent> components;
-    private List<String> globalActions;
+    private List<FormAction> globalActions;
 
-    public FormMenu(String formCommand, String permission, String formTitle, String formContent, FormMenuType formType, List<FormButton> formButtons, List<FormComponent> components, List<String> globalActions) {
+    public FormMenu(String formCommand, String server, String permission, String formTitle, String formContent, FormMenuType formType, List<FormButton> formButtons, List<FormComponent> components, List<FormAction> globalActions) {
         this.formCommand = formCommand;
+        this.server = server;
         this.permission = permission;
         this.formTitle = formTitle;
         this.formContent = formContent;
         this.formType = formType;
         this.formButtons = formButtons;
         this.components = components;
-        this.globalActions = globalActions;  // Initialize global actions
+        this.globalActions = globalActions;
     }
 
     public String getFormCommand() {
@@ -31,6 +32,14 @@ public class FormMenu {
 
     public void setFormCommand(String formCommand) {
         this.formCommand = formCommand;
+    }
+
+    public String getServer() {
+        return server;
+    }
+
+    public void setServer(String server) {
+        this.server = server;
     }
 
     public String getPermission() {
@@ -81,11 +90,11 @@ public class FormMenu {
         this.components = components;
     }
 
-    public List<String> getGlobalActions() {
+    public List<FormAction> getGlobalActions() {
         return globalActions;
     }
 
-    public void setGlobalActions(List<String> globalActions) {
+    public void setGlobalActions(List<FormAction> globalActions) {
         this.globalActions = globalActions;
     }
 
@@ -93,6 +102,7 @@ public class FormMenu {
     public String toString() {
         return new StringJoiner(", ", FormMenu.class.getSimpleName() + "[", "]")
                 .add("formCommand='" + formCommand + "'")
+                .add("server='" + server + "'")
                 .add("permission='" + permission + "'")
                 .add("formTitle='" + formTitle + "'")
                 .add("formContent='" + formContent + "'")
